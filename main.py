@@ -31,7 +31,8 @@ ax.grid(True)
 plt.show()
 
 
+from sklearn.model_selection import train_test_split
 
-
+x_train, x_test, y_train, y_test = train_test_split(caracteristicas_en_bruto, clases, test_size=0.2, train_size=0.8, stratify=clases)
 
 
