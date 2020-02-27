@@ -52,9 +52,9 @@ for sample in samples:
     sin_plus_cos_arr.append(sin + cos)
 
 
-ax2.plot(samples, sin_arr, color="black", label="sin(x)")
-ax2.plot(samples, cos_arr, color="blue", label="cos(x)")
-ax2.plot(samples, sin_plus_cos_arr, color="red", label="sin(x) + cos(x)")
+ax2.plot(samples, sin_arr, color="black", linestyle="dashed", label="sin(x)")
+ax2.plot(samples, cos_arr, color="blue", linestyle="dashed", label="cos(x)")
+ax2.plot(samples, sin_plus_cos_arr, color="red", linestyle="dashed", label="sin(x) + cos(x)")
 ax2.legend()
 
 
