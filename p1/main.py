@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 TRABAJO 1. 
-Nombre Estudiante: 
+Nombre Estudiante: Alejandro Menor Molinero 13174410X
 """
 
 import numpy as np
@@ -13,38 +13,38 @@ print('EJERCICIO SOBRE LA BUSQUEDA ITERATIVA DE OPTIMOS\n')
 print('Ejercicio 1\n')
 
 def E(u,v):
-    return #function   
+    return (u * (np.e ** v) - 2 * v * (np.e ** (-u)) ) ** 2
 
 #Derivada parcial de E con respecto a u
 def dEu(u,v):
-    return #Derivada parcial de E con respecto a u
+    return 2 * (u * (np.e ** v) - 2 * v * (np.e ** (-u))) * ((np.e ** v) + 2 * v * (np.e ** (-u)))
     
 #Derivada parcial de E con respecto a v
 def dEv(u,v):
-    return #Derivada parcial de E con respecto a v
+    return 2 * (u * (np.e ** v) - 2 * v * (np.e ** (-u))) * (u * (np.e ** v) - 2 * (np.e ** (-u)))
 
 #Gradiente de E
 def gradE(u,v):
     return np.array([dEu(u,v), dEv(u,v)])
 
-def gradient_descent(?):
-    #
-    # gradiente descendente
-    # 
-    return w, iterations    
-
+def gradient_descent(initial_point, maxIter, eta):
+    w = initial_point
+    for i in range (maxIter):
+        w -= eta * gradE(w[0], w[1])
+    return w, maxIter
 
 eta = 0.01 
 maxIter = 10000000000
 error2get = 1e-14
-initial_point = np.array([1.0,-1.0])
-w, it = gradient_descent(?)
+initial_point = np.array([1.0, -1.0])
+w, it = gradient_descent(initial_point, maxIter, eta)
 
 
 print ('Numero de iteraciones: ', it)
 print ('Coordenadas obtenidas: (', w[0], ', ', w[1],')')
 
 
+""""
 # DISPLAY FIGURE
 from mpl_toolkits.mplot3d import Axes3D
 x = np.linspace(-30, 30, 50)
@@ -140,6 +140,6 @@ def simula_unif(N, d, size):
 	return np.random.uniform(-size,size,(N,d))
 
 #Seguir haciendo el ejercicio...
-
+"""
 
 
