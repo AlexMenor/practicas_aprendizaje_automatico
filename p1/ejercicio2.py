@@ -38,62 +38,57 @@ def readData(file_x, file_y):
 	return x, y
 
 # Funcion para calcular el error
-def sign(error):
-	if error > 0:
-		return 1
-	else:
-		return-1
-
 def Err(x,y,w):
 	error = 0
 	for i in range(len(x)):
-		guess = 0
-		for j in range(len(x[i])):
-			guess += w[j] * x[i][j]
+		guess = w.dot(x[i])
 
-		if sign(guess) != y[i]:
-			error += 1
-
+		error += ((guess - y[i]) ** 2)
 
 	return error / len(x)
 
-def h(x, w):
-	guess = 0
-	for i in range (len(x)):
-		guess += x[i]*w[i]
-	return guess
 
 # Gradiente Descendente
-def gd(x, y, eta):
-	w = np.array([0, 0, 0])
-	for i in range(1000):
+def gd (x, y, eta, maxiter):
+	w = np.array([0, 0, 0], dtype=float)
+	for i in range(maxiter):
 		for j in range(len(w)):
-			sum = 0
+			sum = 0.0
 			for n in range(len(x)):
-				guess = sign(h(x[n], w))
+				guess = w.dot(x[n])
 				sum += (x[n][j] * (guess - y[n]))
-			w[j] -= eta * sum
+			w[j] -= (eta * (2 *sum)/len(x))
 
 	return w
+
 # Gradiente Descendente Estocastico
-def sgd(x, y, eta, number_of_minibatches):
+def sgd(x, y, eta, number_of_minibatches, maxiter):
 	mini_batches_x = np.array_split(x, number_of_minibatches)
 	mini_batches_y = np.array_split(y, number_of_minibatches)
-	w = np.array([0, 0, 0])
+	w = np.array([0, 0, 0], dtype=float)
 
-	for xs, ys in zip(mini_batches_x, mini_batches_y):
-		for j in range(len(w)):
-			sum = 0
-			for n in range(len(xs)):
-				guess = sign(h(xs[n], w))
-				sum += (xs[n][j] * (guess - ys[n]))
-			w[j] -= eta * sum
+	index_array = np.arange(0, number_of_minibatches)
+
+	for i in range(maxiter):
+		np.random.shuffle(index_array)
+		for random_index in index_array:
+			xs = mini_batches_x[random_index]
+			ys = mini_batches_y[random_index]
+			for j in range(len(w)):
+				sum = 0
+				for n in range(len(xs)):
+					guess = w.dot(xs[n])
+					sum += (xs[n][j] * (guess - ys[n]))
+				w[j] -= (eta * (2*sum)/len(xs))
 
 	return w
 
-# Pseudoinversa	
-def pseudoinverse():
-    pass
+
+# Pseudoinversa
+def pseudoinverse(x,y):
+	pseudoinverse = np.linalg.pinv(x)
+	return pseudoinverse.dot(y)
+
 
 
 # Lectura de los datos de entrenamiento
@@ -102,30 +97,88 @@ x, y = readData('datos/X_train.npy', 'datos/y_train.npy')
 x_test, y_test = readData('datos/X_test.npy', 'datos/y_test.npy')
 
 eta = 0.01
-w = gd(x, y, eta)
+w = gd(x, y, eta, 500)
 
 print ('Bondad del resultado para grad. descendente :\n')
 print ("Ein: ", Err(x, y, w))
 print ("Eout: ", Err(x_test, y_test, w))
 
 eta = 0.01
-n_minibatches = 30
-w = sgd(x, y, eta, n_minibatches)
+n_minibatches = 20
+w = sgd(x, y, eta, n_minibatches, 500)
 
 print ('Bondad del resultado para grad. descendente estocastico:\n')
 print ("Ein: ", Err(x, y, w))
 print ("Eout: ", Err(x_test, y_test, w))
 
+
+w = pseudoinverse(x, y)
+
+print ('Bondad del resultado para pseudoinversa:\n')
+print ("Ein: ", Err(x, y, w))
+print ("Eout: ", Err(x_test, y_test, w))
+
 input("\n--- Pulsar tecla para continuar ---\n")
 
-"""
 
-print('Ejercicio 2\n')
+print('Ejercicio 2 de regresión lineal\n')
+
+import matplotlib.pyplot as plt
 # Simula datos en un cuadrado [-size,size]x[-size,size]
-def simula_unif(N, d, size):
-	return np.random.uniform(-size,size,(N,d))
+def simula_unif(N, size):
+	return np.random.uniform(-size, size, N), np.random.uniform(-size, size,N)
 
-#Seguir haciendo el ejercicio...
-"""
+def fRuido(x,y):
+	f = (x - 0.2) ** 2 + (y ** 2 - 0.6)
+	ruido = np.random.uniform(0, 1)
+	if f > 0:
+		if ruido > 0.1:
+			return "blue", 1
+		else:
+			return "orange", -1
+	else:
+		if ruido > 0.1:
+			return "orange", -1
+		else:
+			return "blue", 1
+
+def xEmpezandoConUno(x,y):
+	toReturn = np.empty([len(x), 3])
+
+	for i in range(len(x)):
+		punto = toReturn[i]
+		punto[0] = 1
+		punto[1] = x[i]
+		punto[2] = y[i]
+
+	return toReturn
+
+
+xpuntos, ypuntos = simula_unif(1000, 1)
+
+
+clases = []
+colores = []
+
+for i in range(len(xpuntos)):
+	color, clase = fRuido(xpuntos[i], ypuntos[i])
+	clases.append(clase)
+	colores.append(color)
+
+plt.scatter(xpuntos, ypuntos, c=colores)
+plt.show()
+
+x = xEmpezandoConUno(xpuntos, ypuntos)
+
+eta = 0.01
+num_minibatches = 20
+maxiter = 500
+w = sgd(x, clases, eta, num_minibatches, maxiter)
+
+print ('Bondad del resultado para gradiente estocástico:\n')
+print ("Ein: ", Err(x, clases, w))
+
+
+
 
 
