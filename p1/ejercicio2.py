@@ -47,7 +47,6 @@ def Err(x,y,w):
 
 	return error / len(x)
 
-
 # Gradiente Descendente
 def gd (x, y, eta, maxiter):
 	w = np.array([0, 0, 0], dtype=float)
@@ -102,6 +101,7 @@ w = gd(x, y, eta, 500)
 print ('Bondad del resultado para grad. descendente :\n')
 print ("Ein: ", Err(x, y, w))
 print ("Eout: ", Err(x_test, y_test, w))
+input("\n--- Pulsar tecla para continuar ---\n")
 
 eta = 0.01
 n_minibatches = 20
@@ -110,6 +110,7 @@ w = sgd(x, y, eta, n_minibatches, 500)
 print ('Bondad del resultado para grad. descendente estocastico:\n')
 print ("Ein: ", Err(x, y, w))
 print ("Eout: ", Err(x_test, y_test, w))
+input("\n--- Pulsar tecla para continuar ---\n")
 
 
 w = pseudoinverse(x, y)
@@ -117,8 +118,8 @@ w = pseudoinverse(x, y)
 print ('Bondad del resultado para pseudoinversa:\n')
 print ("Ein: ", Err(x, y, w))
 print ("Eout: ", Err(x_test, y_test, w))
-
 input("\n--- Pulsar tecla para continuar ---\n")
+
 
 
 print('Ejercicio 2 de regresión lineal\n')
@@ -153,30 +154,58 @@ def xEmpezandoConUno(x,y):
 
 	return toReturn
 
+def get_datasets_experimento(print):
+	xpuntos, ypuntos = simula_unif(1000, 1)
+	clases = []
+	colores = []
 
-xpuntos, ypuntos = simula_unif(1000, 1)
+	for i in range(len(xpuntos)):
+		color, clase = fRuido(xpuntos[i], ypuntos[i])
+		clases.append(clase)
+		colores.append(color)
+
+	if print:
+		fig, ax = plt.subplots()
+		ax.set(xlabel='x', ylabel='y',
+			   title='1000 puntos generados aleatoriamente')
+		ax.scatter(xpuntos, ypuntos, c=colores)
+		plt.show()
+		input("\n--- Pulsar tecla para continuar ---\n")
+
+	x = xEmpezandoConUno(xpuntos, ypuntos)
+
+	return x, clases
 
 
-clases = []
-colores = []
 
-for i in range(len(xpuntos)):
-	color, clase = fRuido(xpuntos[i], ypuntos[i])
-	clases.append(clase)
-	colores.append(color)
-
-plt.scatter(xpuntos, ypuntos, c=colores)
-plt.show()
-
-x = xEmpezandoConUno(xpuntos, ypuntos)
+x, y = get_datasets_experimento(True)
 
 eta = 0.01
 num_minibatches = 20
 maxiter = 500
-w = sgd(x, clases, eta, num_minibatches, maxiter)
+w = sgd(x, y, eta, num_minibatches, maxiter)
 
 print ('Bondad del resultado para gradiente estocástico:\n')
-print ("Ein: ", Err(x, clases, w))
+print ("Ein: ", Err(x, y, w))
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+veces_a_repetir_experimento = 1000
+error_acum_in = 0
+error_acum_out = 0
+
+for i in range(veces_a_repetir_experimento):
+	x, y = get_datasets_experimento(False)
+	w = sgd(x, y, eta, num_minibatches, maxiter)
+	error_acum_in += Err(x, y, w)
+	x_test, y_test = get_datasets_experimento(False)
+	error_acum_out += Err(x_test, y_test, w)
+
+print("El error medio Ein es ", error_acum_in/veces_a_repetir_experimento)
+print("El error medio Eout es ", error_acum_out/veces_a_repetir_experimento)
+
+
+
 
 
 
