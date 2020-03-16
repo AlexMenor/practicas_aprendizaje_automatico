@@ -89,14 +89,45 @@ def pseudoinverse(x,y):
 	return pseudoinverse.dot(y)
 
 
+def printPointsAndSolution(x, y, w, title):
+	x1 = []
+	x2 = []
+	colores = []
+
+	for i in range(len(x)):
+		x1.append(x[i][1])
+		x2.append(x[i][2])
+		if y[i] == 1:
+			colores.append('blue')
+		else:
+			colores.append('orange')
+
+
+	fig, ax = plt.subplots()
+	ax.set(xlabel='Nivel de gris', ylabel='Simetria',
+		   title='Dataset y solución ' + title)
+	ax.scatter(x1, x2, c=colores)
+
+	valoresDistribuidosX1 = np.linspace(0, 0.6, 1000)
+	valoresDistribuidosX2 = []
+	for i in range(1000):
+		valoresDistribuidosX2.append((-valoresDistribuidosX1[i]*w[1] - w[0])/w[2])
+
+	ax.plot(valoresDistribuidosX1, valoresDistribuidosX2)
+	plt.show()
+	input("\n--- Pulsar tecla para continuar ---\n")
+
+
 
 # Lectura de los datos de entrenamiento
 x, y = readData('datos/X_train.npy', 'datos/y_train.npy')
 # Lectura de los datos para el test
 x_test, y_test = readData('datos/X_test.npy', 'datos/y_test.npy')
 
+
 eta = 0.01
 w = gd(x, y, eta, 500)
+printPointsAndSolution(x,y,w, "gradiente decendente")
 
 print ('Bondad del resultado para grad. descendente :\n')
 print ("Ein: ", Err(x, y, w))
@@ -107,6 +138,8 @@ eta = 0.01
 n_minibatches = 20
 w = sgd(x, y, eta, n_minibatches, 500)
 
+printPointsAndSolution(x,y,w, "gradiente decendente estocástico")
+
 print ('Bondad del resultado para grad. descendente estocastico:\n')
 print ("Ein: ", Err(x, y, w))
 print ("Eout: ", Err(x_test, y_test, w))
@@ -114,6 +147,8 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 w = pseudoinverse(x, y)
+
+printPointsAndSolution(x,y,w, "Pseudoinversa")
 
 print ('Bondad del resultado para pseudoinversa:\n')
 print ("Ein: ", Err(x, y, w))
@@ -184,6 +219,7 @@ eta = 0.01
 num_minibatches = 20
 maxiter = 500
 w = sgd(x, y, eta, num_minibatches, maxiter)
+
 
 print ('Bondad del resultado para gradiente estocástico:\n')
 print ("Ein: ", Err(x, y, w))
