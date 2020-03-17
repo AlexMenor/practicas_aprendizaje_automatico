@@ -15,6 +15,10 @@ def imprimir_valor_por_iteration(valores_por_iteracion):
 
     plt.show()
 
+
+"""Derivadas segundas y otras funciones necesarias para minimizar
+f con el método de Newton"""
+
 def f(x, y):
     return (x - 2) ** 2 \
            + 2 * ((y + 2) ** 2) \
@@ -97,6 +101,9 @@ print('Mínimo obtenido: ', f(wF[0], wF[1]))
 input("\n--- Pulsar tecla para continuar ---\n")
 
 
+"""
+Hacemos el mismo experimento que antes: 4 puntos y 2 learning rate
+"""
 """
 Función para generar una tabla, fuente: https://stackoverflow.com/questions/51730186/how-to-generate-table-using-python
 """

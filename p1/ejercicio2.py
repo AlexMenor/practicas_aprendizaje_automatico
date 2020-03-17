@@ -89,6 +89,8 @@ def pseudoinverse(x,y):
 	return pseudoinverse.dot(y)
 
 
+"""Como era recurrente pintar el error
+y la gráfica de los datos y la solución, lo he extraído en una función"""
 def printPointsAndSolution(x, y, w, title):
 	x1 = []
 	x2 = []
@@ -118,6 +120,16 @@ def printPointsAndSolution(x, y, w, title):
 	input("\n--- Pulsar tecla para continuar ---\n")
 
 
+"""
+ (2.5 puntos) Estimar un modelo de regresión lineal a partir de los datos proporcionados de
+dichos números (Intensidad promedio, Simetria) usando tanto el algoritmo de la pseudo-
+inversa como Gradiente descendente estocástico (SGD). Las etiquetas serán {−1, 1}, una
+para cada vector de cada uno de los números. Pintar las soluciones obtenidas junto con los
+datos usados en el ajuste. Valorar la bondad del resultado usando Ein y Eout (para Eout cal-
+cular las predicciones usando los datos del fichero de test). ( usar Regress_Lin(datos, label)
+como llamada para la función (opcional)).
+
+"""
 
 # Lectura de los datos de entrenamiento
 x, y = readData('datos/X_train.npy', 'datos/y_train.npy')
@@ -157,12 +169,24 @@ input("\n--- Pulsar tecla para continuar ---\n")
 
 
 
+"""
+ En este apartado exploramos como se transforman los errores Ein y Eout cuando au-
+mentamos la complejidad del modelo lineal usado. Ahora hacemos uso de la función
+simula_unif (N, 2, size) que nos devuelve N coordenadas 2D de puntos uniformemente
+muestreados dentro del cuadrado definido por [−size, size] × [−size, size]
+
+"""
+
 print('Ejercicio 2 de regresión lineal\n')
 
 import matplotlib.pyplot as plt
 # Simula datos en un cuadrado [-size,size]x[-size,size]
 def simula_unif(N, size):
 	return np.random.uniform(-size, size, N), np.random.uniform(-size, size,N)
+
+"""
+Simula la función con ruído, devolviendo la etiqueta y su color en la gráfica
+"""
 
 def fRuido(x,y):
 	f = (x - 0.2) ** 2 + (y ** 2 - 0.6)
@@ -178,6 +202,8 @@ def fRuido(x,y):
 		else:
 			return "blue", 1
 
+"""Añade un uno y devuelve el array con los dos puntos"""
+
 def xEmpezandoConUno(x,y):
 	toReturn = np.empty([len(x), 3])
 
@@ -189,6 +215,7 @@ def xEmpezandoConUno(x,y):
 
 	return toReturn
 
+"""Pinta los puntos y devuelve los datasets"""
 def get_datasets_experimento(print):
 	xpuntos, ypuntos = simula_unif(1000, 1)
 	clases = []

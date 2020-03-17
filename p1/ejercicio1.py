@@ -100,6 +100,10 @@ def imprimir_valor_por_iteration(valores_por_iteracion):
 
     plt.show()
 
+"""
+Implementación de las derivadas y funciones necesarias para minimizar f
+"""
+
 def f(x, y):
     return (x - 2) ** 2 \
            + 2 * ((y + 2) ** 2) \
@@ -210,6 +214,9 @@ def initialPoint(x, y):
     return np.array([x, y])
 
 
+"""
+Realiza todo el experimento, los cuatro puntos para un learning rate dado
+"""
 def compareInitialPoints(etaF):
     initialPoints = [
         initialPoint(2.1, -2.1),
