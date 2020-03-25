@@ -39,6 +39,7 @@ def readData(file_x, file_y):
 	return x, y
 
 # Funcion para calcular el error
+"""
 def Err(x,y,w):
 	error = 0
 	for i in range(len(x)):
@@ -47,8 +48,17 @@ def Err(x,y,w):
 		error += ((guess - y[i]) ** 2)
 
 	return error / len(x)
+"""
+# Optimizada con operaciones matriciales
+# Reshape (-1,1) pone el vector como una sola columna
+def Err(x,y,w):
+	errorBruto = x.dot(w.reshape(-1, 1)) - y.reshape(-1, 1)
+	errorCuadratico = np.square(errorBruto)
+
+	return errorCuadratico.mean()
 
 # Gradiente Descendente
+
 def gd (x, y, eta, maxiter):
 	w = np.array([0, 0, 0], dtype=float)
 	for i in range(maxiter):
@@ -62,6 +72,7 @@ def gd (x, y, eta, maxiter):
 	return w
 
 # Gradiente Descendente Estocastico
+"""
 def sgd(x, y, eta, number_of_minibatches, maxiter):
 	mini_batches_x = np.array_split(x, number_of_minibatches)
 	mini_batches_y = np.array_split(y, number_of_minibatches)
@@ -82,6 +93,30 @@ def sgd(x, y, eta, number_of_minibatches, maxiter):
 				w[j] -= (eta * (2*sum)/len(xs))
 
 	return w
+"""
+# Optimizada con operaciones matriciales
+def sgd(x, y, eta, number_of_minibatches, maxiter):
+	mini_batches_x = np.array_split(x, number_of_minibatches)
+	mini_batches_y = np.array_split(y, number_of_minibatches)
+	w = np.array([0, 0, 0], dtype=float)
+
+	index_array = np.arange(0, number_of_minibatches)
+
+	for i in range(maxiter):
+		np.random.shuffle(index_array)
+		for random_index in index_array:
+			xs = mini_batches_x[random_index]
+			ys = mini_batches_y[random_index]
+			error_actual = xs.dot(w) - ys
+			"""(xs[n][j] * (guess - ys[n])) pero matricial"""
+			error_por_x = xs * error_actual.reshape(-1, 1)
+			""" Hacemos la media de las columnas nos queda vector 1xd"""
+			correcion = np.mean(error_por_x, axis=0)
+			""" Corregimos w"""
+			w -= (2 * eta * correcion)
+
+	return w
+
 
 
 # Pseudoinversa
@@ -219,12 +254,12 @@ def xEmpezandoConUno(x,y):
 """Pinta los puntos y devuelve los datasets"""
 def get_datasets_experimento(print):
 	xpuntos, ypuntos = simula_unif(1000, 1)
-	clases = []
+	clases = np.empty(1000)
 	colores = []
 
 	for i in range(len(xpuntos)):
 		color, clase = fRuido(xpuntos[i], ypuntos[i])
-		clases.append(clase)
+		clases[i]= clase
 		colores.append(color)
 
 	if print:
@@ -329,6 +364,7 @@ def transformarAlNuevoModelo(xOriginal):
 	return nuevoX
 
 
+""" Sin optimizar 
 
 def nuevoSgd(x, y, eta, number_of_minibatches, maxiter):
 	mini_batches_x = np.array_split(x, number_of_minibatches)
@@ -348,6 +384,29 @@ def nuevoSgd(x, y, eta, number_of_minibatches, maxiter):
 					guess = w.dot(xs[n])
 					sum += (xs[n][j] * (guess - ys[n]))
 				w[j] -= (eta * (2*sum)/len(xs))
+
+	return w
+	"""
+
+def nuevoSgd(x, y, eta, number_of_minibatches, maxiter):
+	mini_batches_x = np.array_split(x, number_of_minibatches)
+	mini_batches_y = np.array_split(y, number_of_minibatches)
+	w = np.array([0, 0, 0, 0, 0, 0], dtype=float)
+
+	index_array = np.arange(0, number_of_minibatches)
+
+	for i in range(maxiter):
+		np.random.shuffle(index_array)
+		for random_index in index_array:
+			xs = mini_batches_x[random_index]
+			ys = mini_batches_y[random_index]
+			error_actual = xs.dot(w) - ys
+			"""(xs[n][j] * (guess - ys[n])) pero matricial"""
+			error_por_x = xs * error_actual.reshape(-1, 1)
+			""" Hacemos la media de las columnas nos queda vector 1xd"""
+			correcion = np.mean(error_por_x, axis=0)
+			""" Corregimos w"""
+			w -= (2 * eta * correcion)
 
 	return w
 
