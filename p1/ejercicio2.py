@@ -3,6 +3,7 @@
 TRABAJO 1. 
 Nombre Estudiante: Alejandro Menor Molinero 13174410X
 """
+import math
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -239,6 +240,35 @@ def get_datasets_experimento(print):
 	return x, clases
 
 
+""" Para imprimir el ajuste a los puntos obtenidos """
+def printPointsAndSolutionFor2DPoints(x, y, w):
+	x1 = []
+	x2 = []
+	colores = []
+
+	for i in range(len(x)):
+		x1.append(x[i][1])
+		x2.append(x[i][2])
+		if y[i] == 1:
+			colores.append('blue')
+		else:
+			colores.append('orange')
+
+
+	fig, ax = plt.subplots()
+	ax.set(xlabel='X', ylabel='Y',
+		   title='Ajuste al espacio de puntos 2D que hemos generado')
+	ax.scatter(x1, x2, c=colores)
+
+	valoresDistribuidosX1 = np.linspace(-0.25, 0.25, 1000)
+	valoresDistribuidosX2 = []
+	for i in range(1000):
+		valoresDistribuidosX2.append((-valoresDistribuidosX1[i]*w[1] - w[0])/w[2])
+
+	ax.plot(valoresDistribuidosX1, valoresDistribuidosX2)
+	ax.set_ylim(-1,1)
+	plt.show()
+	input("\n--- Pulsar tecla para continuar ---\n")
 
 x, y = get_datasets_experimento(True)
 
@@ -247,30 +277,153 @@ num_minibatches = 20
 maxiter = 500
 w = sgd(x, y, eta, num_minibatches, maxiter)
 
+printPointsAndSolutionFor2DPoints(x,y,w)
+""" Copiamos x e y para el ajuste de despues"""
+xOriginal = x.copy()
+yOriginal = y.copy()
 
 print ('Bondad del resultado para gradiente estocástico:\n')
 print ("Ein: ", Err(x, y, w))
 input("\n--- Pulsar tecla para continuar ---\n")
+respuesta = input("¿Quiere ejecutar el experimento de las 1000 iteraciones? (Tarda bastante) [y/n]")
+
+""" Experimento de las mil iteraciones para un modelo lineal"""
+if respuesta == "y":
+	veces_a_repetir_experimento = 1000
+	error_acum_in = 0
+	error_acum_out = 0
+
+	for i in range(veces_a_repetir_experimento):
+		x, y = get_datasets_experimento(False)
+		w = sgd(x, y, eta, num_minibatches, maxiter)
+		error_acum_in += Err(x, y, w)
+		x_test, y_test = get_datasets_experimento(False)
+		error_acum_out += Err(x_test, y_test, w)
+
+	print("El error medio Ein es ", error_acum_in/veces_a_repetir_experimento)
+	print("El error medio Eout es ", error_acum_out/veces_a_repetir_experimento)
 
 
-veces_a_repetir_experimento = 1000
-error_acum_in = 0
-error_acum_out = 0
-
-for i in range(veces_a_repetir_experimento):
-	x, y = get_datasets_experimento(False)
-	w = sgd(x, y, eta, num_minibatches, maxiter)
-	error_acum_in += Err(x, y, w)
-	x_test, y_test = get_datasets_experimento(False)
-	error_acum_out += Err(x_test, y_test, w)
-
-print("El error medio Ein es ", error_acum_in/veces_a_repetir_experimento)
-print("El error medio Eout es ", error_acum_out/veces_a_repetir_experimento)
 
 
+""" Intentamos aumentar la complejidad del modelo para ajustar mejor a los datos"""
+
+""" Empezamos transformando x """
+
+
+""" El nuevo X es de 1000 puntos por 6 caracteristicas (las 3 del primer
+modelo y 3 nuevas) """
+
+def transformarAlNuevoModelo(xOriginal):
+	nuevoX = np.empty([1000, 6], dtype=float)
+	for i in range(len(xOriginal)):
+		xi = xOriginal[i][1]
+		yi = xOriginal[i][2]
+		nuevoX[i][0] = 1
+		nuevoX[i][1] = xi
+		nuevoX[i][2] = yi
+		nuevoX[i][3] = xi * yi
+		nuevoX[i][4] = xi ** 2
+		nuevoX[i][5] = yi ** 2
+
+	return nuevoX
 
 
 
+def nuevoSgd(x, y, eta, number_of_minibatches, maxiter):
+	mini_batches_x = np.array_split(x, number_of_minibatches)
+	mini_batches_y = np.array_split(y, number_of_minibatches)
+	w = np.array([0, 0, 0,0,0,0], dtype=float)
 
+	index_array = np.arange(0, number_of_minibatches)
+
+	for i in range(maxiter):
+		np.random.shuffle(index_array)
+		for random_index in index_array:
+			xs = mini_batches_x[random_index]
+			ys = mini_batches_y[random_index]
+			for j in range(len(w)):
+				sum = 0
+				for n in range(len(xs)):
+					guess = w.dot(xs[n])
+					sum += (xs[n][j] * (guess - ys[n]))
+				w[j] -= (eta * (2*sum)/len(xs))
+
+	return w
+
+nuevoX = transformarAlNuevoModelo(xOriginal)
+
+wNuevo = nuevoSgd(nuevoX, yOriginal, 0.01, 20, 500)
+
+
+
+def nuevoPrintPointsAndSolutionFor2DPoints(x, y, w):
+	x1 = []
+	x2 = []
+	colores = []
+
+	for i in range(len(x)):
+		x1.append(x[i][1])
+		x2.append(x[i][2])
+		if y[i] == 1:
+			colores.append('blue')
+		else:
+			colores.append('orange')
+
+
+	fig, ax = plt.subplots()
+	ax.set(xlabel='X', ylabel='Y',
+		   title='Ajuste al espacio de puntos 2D que hemos generado')
+	ax.scatter(x1, x2, c=colores)
+
+	valoresDistribuidosX1 = np.linspace(-0.66,1, 1000)
+	valoresDistribuidosX2 = []
+	valoresDistribuidosX22 = []
+	for i in range(1000):
+		x1 = valoresDistribuidosX1[i]
+		if w[5] == 0:
+			x2 = (-x1*w[1] - w[0] - w[4]*x1*x1)/(w[2] + w[3]*x1)
+			x22 = x2
+		else:
+			interior_raiz = (w[2]+w[3]*x1)**2 - (4*w[5]*(x1*w[1]+ w[0]+w[4]*x1*x1))
+			x2 = (-np.sqrt(interior_raiz) -w[2] -w[3]*x1) / (2*w[5])
+			x22 = (np.sqrt(interior_raiz) -w[2] -w[3]*x1) / (2*w[5])
+
+		valoresDistribuidosX2.append(x2)
+		valoresDistribuidosX22.append(x22)
+
+	ax.plot(valoresDistribuidosX1, valoresDistribuidosX2)
+	ax.set_ylim(-1,1)
+	ax.plot(valoresDistribuidosX1, valoresDistribuidosX22)
+	ax.set_ylim(-1,1)
+	plt.show()
+	input("\n--- Pulsar tecla para continuar ---\n")
+
+
+nuevoPrintPointsAndSolutionFor2DPoints(nuevoX, yOriginal, wNuevo)
+Ein = Err(nuevoX, yOriginal, wNuevo)
+print("Ein para el nuevo modelo: ", Ein)
+input("\n--- Pulsar tecla para continuar ---\n")
+
+
+respuesta = input("¿Quiere ejecutar el experimento de las 1000 iteraciones con el nuevo modelo? (Tarda bastante) [y/n]")
+
+""" Experimento de las mil iteraciones para un modelo más complejo"""
+if respuesta == "y":
+	veces_a_repetir_experimento = 1000
+	error_acum_in = 0
+	error_acum_out = 0
+
+	for i in range(veces_a_repetir_experimento):
+		x, y = get_datasets_experimento(False)
+		nuevoX = transformarAlNuevoModelo(x)
+		w = nuevoSgd(nuevoX, y, eta, num_minibatches, maxiter)
+		error_acum_in += Err(nuevoX, y, w)
+		x_test, y_test = get_datasets_experimento(False)
+		nuevoXTest = transformarAlNuevoModelo(x_test)
+		error_acum_out += Err(nuevoXTest, y_test, w)
+
+	print("El error medio Ein es ", error_acum_in/veces_a_repetir_experimento)
+	print("El error medio Eout es ", error_acum_out/veces_a_repetir_experimento)
 
 
